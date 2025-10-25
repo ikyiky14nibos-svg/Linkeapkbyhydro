@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HYDROLINK</title>
+<style>
+  :root{
+    --bg1: #05060a;
+    --bg2: #0f1720;
+    --card: #0b1220;
+    --accent: #00c6ff;
+    --text: #e6f7ff;
+  }
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  body{
+    background: linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+  }
+  .wrap{
+    width:100%;
+    max-width:420px; /* portrait friendly */
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+  header{
+    text-align:center;
+    padding:18px;
+    border-radius:14px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+  }
+  header h1{margin:0;font-size:22px;letter-spacing:1px;color:var(--accent);}
+  header p{margin:6px 0 0 0;font-size:12px;opacity:.9}
+  /* Two required rectangles (Steps) */
+  .step-card{
+    background:linear-gradient(180deg,#071226, #091726);
+    border-radius:14px;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+  }
+  .step-card h3{margin:0;font-size:15px;color:#fff;}
+  .btn{
+    appearance:none;border:0;padding:12px 14px;border-radius:10px;font-weight:700;cursor:pointer;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.45);
+  }
+  .btn-primary{background:var(--accent); color:#001018;}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06); color:var(--text);}
+  .hidden{display:none !important;}
+  /* downloads list */
+  .downloads{
+    border-radius:14px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .item{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding:10px;
+    border-radius:10px;
+    background:linear-gradient(180deg, rgba(0,0,0,0.2), rgba(255,255,255,0.01));
+  }
+  .item .title{font-size:14px; font-weight:700;}
+  .item .meta{font-size:12px; opacity:.9;}
+  .row{display:flex;gap:8px;flex-wrap:wrap;}
+  .pw-note{font-size:12px;color:#ffd; background:rgba(0,0,0,0.2); padding:6px;border-radius:8px;}
+  footer{font-size:12px; text-align:center; opacity:.9; padding:6px;}
+  /* responsive big tap targets */
+  button.btn{width:100%;}
+  @media(min-width:700px){
+    .wrap{max-width:520px;}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>HYDROLINK</h1>
+      <p>Gabung dulu → Baru bisa download</p>
+    </header>
+
+    <!-- Step 1: Group -->
+    <div id="step1" class="step-card">
+      <h3>Langkah 1: Wajib Gabung Grup WhatsApp</h3>
+      <div class="row" style="width:100%;">
+        <button class="btn btn-primary" onclick="joinGroup()">Gabung Grup WhatsApp</button>
+      </div>
+      <small class="meta">Link grup akan terbuka di tab baru. Setelah klik, lanjut ke langkah berikutnya.</small>
+    </div>
+
+    <!-- Step 2: Channel -->
+    <div id="step2" class="step-card hidden">
+      <h3>Langkah 2: Wajib Gabung Saluran WhatsApp</h3>
+      <div class="row" style="width:100%;">
+        <button class="btn btn-primary" onclick="joinChannel()">Gabung Saluran WhatsApp</button>
+      </div>
+      <small class="meta">Setelah klik, tombol download akan ditampilkan.</small>
+    </div>
+
+    <!-- Downloads: initially hidden -->
+    <div id="downloads" class="downloads hidden">
+      <h3 style="margin:0 0 6px 0;">Daftar Download</h3>
+
+      <!-- We'll generate items via JS, but provide a fallback list for no-js -->
+      <noscript>
+        <div class="item"><div class="title">Aktifkan JavaScript untuk melihat tombol download.</div></div>
+      </noscript>
+    </div>
+
+    <footer>
+      © HYDROLINK — Pastikan koneksi stabil saat download.
+    </footer>
+  </div>
+
+<script>
+  // group/channel links (user provided)
+  const GROUP_LINK = "https://chat.whatsapp.com/GtmJq6ZMBHvDOmuJjRs6pe?mode=wwt";
+  const CHANNEL_LINK = "https://whatsapp.com/channel/0029Vb5NpUy6GcG6grRK8K02";
+
+  let groupJoined = false;
+  let channelJoined = false;
+
+  function joinGroup(){
+    window.open(GROUP_LINK, "_blank");
+    groupJoined = true;
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    // Focus UX: scroll to step2
+    setTimeout(()=>{ document.getElementById('step2').scrollIntoView({behavior:"smooth"}); }, 200);
+  }
+
+  function joinChannel(){
+    window.open(CHANNEL_LINK, "_blank");
+    channelJoined = true;
+    document.getElementById('step2').classList.add('hidden');
+    showDownloads();
+    setTimeout(()=>{ document.getElementById('downloads').scrollIntoView({behavior:"smooth"}); }, 200);
+  }
+
+  // Data list of downloads (title, url, optional password)
+  const downloadsData = [
+    {title:"BAHAN UP DABIS", url:"https://www.mediafire.com/file/dpod43top44pd51/ALL_BAHAN_UP_DABIS_FRESH_2025_HYDRO.7z/file"},
+    {title:"APK BANDING HYDRO", url:"https://www.mediafire.com/file/8ts4ox8eq56gqdq/HYDRO_BANDING_VVIP.apk/file"},
+
+    // New entries from your message
+    {title:"APK BUAT NGE JB & GAME - SET ANDRO NOXXA DAN KENO (IMG)", url:"https://www.mediafire.com/view/l4dbn4nvnzq86p2/IMG-20240217-WA0123.jpg/file"},
+    {title:"APK BUAT NGE JB & GAME - VIP (IMG)", url:"https://www.mediafire.com/view/x46faju2gkr6gss/IMG-20240217-WA0122.jpg/file"},
+
+    {title:"22 APK KEBUTUHAN JB - APK BEKU PAYMENT", url:"https://www.mediafire.com/file/6akvqz49xtw0ev2/APK_BEKU_PAYMENT.apk/file"},
+    {title:"APK PUSH KONTAK", url:"https://www.mediafire.com/file/nblb38pjap3a2fu/Apk%25E2%2580%25A2Push%25E2%2580%25A2Kontak.apk/file"},
+    {title:"APK KENON", url:"https://www.mediafire.com/file/9rxopb6zywgre54/APK_KENON.apk/file"},
+    {title:"APK AUTO SAVE CONTACT", url:"https://www.mediafire.com/file/ic0nmflzed8fni7/AutoSave_Contact.apk/file"},
+    {title:"APK BANINDO ELITE", url:"https://www.mediafire.com/file/ufkd1ehejirgkbp/BANIDO_ELIT.apk/file"},
+    {title:"APK BANNED GMAIL", url:"https://www.mediafire.com/file/9a9i5gvg19ieq83/BANNED_GMAIL.apk/file"},
+    {title:"APK BANNED & UNBANNED NUMBER", url:"https://www.mediafire.com/file/5a45pqsnj1ywt11/BANNED_%2526_UNBANNED_NUMBER.apk/file"},
+    {title:"APK E-KTP SIMULASI", url:"https://www.mediafire.com/file/5evytq58wppctfk/E-KTP_Simulasi.apk/file"},
+    {title:"APK JPM", url:"https://www.mediafire.com/file/bebwq6vhpb17v83/JPM.apk/file"},
+    {title:"APK ORDER SOSMED", url:"https://www.mediafire.com/file/ti04bah612czb4w/OrderSosmed.apk/file"},
+    {title:"APK PIXELLAB LOGO", url:"https://www.mediafire.com/file/fdsli77j52rf2hq/Pixellab_Logo.apk/file"},
+    {title:"APK TEMP MAIL PREMIUM", url:"https://www.mediafire.com/file/de03ykicvzr1ett/Temp_Mail_Premium.apk/file"},
+    {title:"APK UP ORKUT VIA GALERRY", url:"https://www.mediafire.com/file/rdv40x65tdai3hm/OrderKuota-Mod_%2528SFILE.MOBI%2529.apk/file"},
+    {title:"BANNED PRIVATE", url:"https://www.mediafire.com/file/9fme89czncavjw7/BANNED_PRIVATE_2.23.1.11_r_sign.apk/file"},
+    {title:"APK QRISS NO KTP (Play Store)", url:"https://play.google.com/store/apps/details?id=com.minipulpayment"},
+    {title:"APK DANA FAKE (zip) — PW: K3R3N", url:"https://www.mediafire.com/file/k27b3ibk4lz6t0y/FAKE_DANA_NOTIFIKASI.zip/file", pw:"K3R3N"},
+
+    {title:"PIXELLAB ARMY — PW: subrek", url:"https://www.mediafire.com/download/3olqkvrmmeuowxq", pw:"subrek"},
+    {title:"PIXELLAB PURPLE — PW: 0708", url:"https://www.mediafire.com/download/vu6gcgjqni09vki", pw:"0708"},
+    {title:"PIXELLAB RED — PW: merah", url:"https://www.mediafire.com/download/bha2etexmvkvola", pw:"merah"},
+    {title:"PIXELLAB NEON — PW: like", url:"https://www.mediafire.com/download/qx51hyu9x2ovj1y", pw:"like"},
+
+    {title:"Bobol Wifi V1 (Play Store)", url:"https://play.google.com/store/apps/details?id=com.halo.wifikey.wifilocating"},
+    {title:"Bobol Wifi V2 (Play Store)", url:"https://play.google.com/store/apps/details?id=com.instabridge.android"},
+
+    // Source reference (not a download)
+    {title:"Sumber: Channel WhatsApp", url:"https://whatsapp.com/channel/0029ValalxrICVfeUyTSrV1O", note:"(informasi sumber)"}
+  ];
+
+  function showDownloads(){
+    const container = document.getElementById('downloads');
+    container.classList.remove('hidden');
+
+    // clear any existing (in case)
+    container.querySelectorAll('.item').forEach(n=>n.remove());
+
+    downloadsData.forEach((d, idx) => {
+      // Skip showing source as a download button? We'll show it as info link.
+      const item = document.createElement('div');
+      item.className = 'item';
+
+      const title = document.createElement('div');
+      title.className = 'title';
+      title.textContent = d.title;
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = d.note ? d.note : '';
+
+      const row = document.createElement('div');
+      row.className = 'row';
+
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-primary';
+      btn.textContent = (d.url ? "Download / Buka" : "Buka Link");
+      btn.onclick = function(){
+        // open the mediafire/playstore/external link
+        if(!groupJoined || !channelJoined){
+          alert("Wajib gabung Grup & Saluran terlebih dahulu.");
+          return;
+        }
+        window.open(d.url, "_blank");
+      };
+
+      row.appendChild(btn);
+
+      // if there is password, show it and add copy button
+      if(d.pw){
+        const pwWrap = document.createElement('div');
+        pwWrap.style.display = 'flex';
+        pwWrap.style.gap = '8px';
+        pwWrap.style.alignItems = 'center';
+
+        const pwNote = document.createElement('div');
+        pwNote.className = 'pw-note';
+        pwNote.textContent = "Password: " + d.pw;
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'btn btn-ghost';
+        copyBtn.style.width = 'auto';
+        copyBtn.textContent = 'Salin PW';
+        copyBtn.onclick = function(e){
+          e.stopPropagation();
+          navigator.clipboard?.writeText(d.pw).then(()=>{ alert("Password disalin: " + d.pw); }).catch(()=>{ prompt("Salin manual password:", d.pw); });
+        };
+
+        pwWrap.appendChild(pwNote);
+        pwWrap.appendChild(copyBtn);
+        item.appendChild(title);
+        if(meta.textContent) item.appendChild(meta);
+        item.appendChild(row);
+        item.appendChild(pwWrap);
+      } else {
+        item.appendChild(title);
+        if(meta.textContent) item.appendChild(meta);
+        item.appendChild(row);
+      }
+
+      container.appendChild(item);
+    });
+
+  }
+
+  // Optional: auto-show downloads if channelJoined flag stored (not persistent here)
+  // But ensure group/channel logic enforced.
+</script>
+</body>
+</html>
